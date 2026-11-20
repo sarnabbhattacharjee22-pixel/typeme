@@ -26,31 +26,74 @@
         'comeback-racer':'Comeback Racer','consistency':'Consistency','champion':'Champion',
         'perfect-run':'Perfect Run','marathon':'Marathon'
       };
+      let bridgePromise = null;
+      function connectBridge() {
+        if (bridgePromise) return bridgePromise;
+        const appsScriptUrl = window.WPM_CONFIG && window.WPM_CONFIG.appsScriptUrl;
+        let url;
+        try {
+          url = new URL(appsScriptUrl);
+          if (url.protocol !== 'https:' || url.hostname !== 'script.google.com' ||
+              !/^\/macros\/s\/[^/]+\/exec$/.test(url.pathname)) throw new Error('Invalid URL');
+        } catch (error) {
+          return Promise.reject(new Error('Set the Apps Script web app /exec URL in config.js.'));
+        }
+        bridgePromise = new Promise(function(resolve, reject) {
+          const frame = document.createElement('iframe');
+          frame.hidden = true;
+          frame.title = 'WPM RACER backend connection';
+          const timeout = setTimeout(function() {
+            window.removeEventListener('message', onReady);
+            frame.remove();
+            bridgePromise = null;
+            reject(new Error('Could not connect to Apps Script. Check its deployment and allowed origin.'));
+          }, 30000);
+          function onReady(event) {
+            let inFrame = false;
+            try { inFrame = event.source === frame.contentWindow || event.source.parent === frame.contentWindow; }
+            catch (error) { return; }
+            let origin;
+            try { origin = new URL(event.origin); } catch (error) { return; }
+            if (!inFrame || origin.protocol !== 'https:' ||
+                !/^(?:[a-z0-9-]+-)?script\.googleusercontent\.com$/i.test(origin.hostname) ||
+                !event.data || event.data.type !== 'wpm-ready') return;
+            clearTimeout(timeout);
+            window.removeEventListener('message', onReady);
+            resolve({window:event.source, origin:event.origin});
+          }
+          window.addEventListener('message', onReady);
+          frame.src = url.href;
+          document.body.appendChild(frame);
+        });
+        return bridgePromise;
+      }
       async function call(action, payload) {
-        const apiUrl = window.WPM_CONFIG && window.WPM_CONFIG.apiUrl;
-        if (!apiUrl || apiUrl.indexOf('YOUR-WORKER') >= 0) {
-          throw new Error('Set the Cloudflare Worker API URL in config.js before using WPM RACER.');
-        }
-        let response;
-        try {
-          response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({action:action, payload:Object.assign({}, payload || {}, {token:state.token})}),
-            credentials: 'omit',
-            cache: 'no-store'
-          });
-        } catch (error) {
-          throw new Error('Could not reach the WPM RACER API. Check the network and proxy configuration.');
-        }
-        let result;
-        try {
-          result = await response.json();
-        } catch (error) {
-          throw new Error('The API proxy returned an invalid response.');
-        }
-        if (!response.ok || !result || !result.ok) {
-          throw new Error(result && result.error || 'The API request failed (' + response.status + ').');
+        const bridge = await connectBridge();
+        const random = new Uint8Array(16);
+        crypto.getRandomValues(random);
+        const id = Array.from(random, function(byte) { return byte.toString(16).padStart(2, '0'); }).join('');
+        const result = await new Promise(function(resolve, reject) {
+          const timeout = setTimeout(function() {
+            window.removeEventListener('message', onResponse);
+            reject(new Error('Apps Script took too long to respond. Please try again.'));
+          }, 150000);
+          function onResponse(event) {
+            if (event.source !== bridge.window || event.origin !== bridge.origin ||
+                !event.data || event.data.type !== 'wpm-response' || event.data.id !== id) return;
+            clearTimeout(timeout);
+            window.removeEventListener('message', onResponse);
+            if (event.data.error) reject(new Error(event.data.error));
+            else resolve(event.data.result);
+          }
+          window.addEventListener('message', onResponse);
+          bridge.window.postMessage({
+            type:'wpm-request',
+            id:id,
+            request:{action:action, payload:Object.assign({}, payload || {}, {token:state.token})}
+          }, bridge.origin);
+        });
+        if (!result || !result.ok) {
+          throw new Error(result && result.error || 'The Apps Script request failed.');
         }
         return result.data;
       }

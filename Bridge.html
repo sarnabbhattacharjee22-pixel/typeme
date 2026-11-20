@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head><base target="_top"></head>
+  <body>
+    <script>
+      const allowedOrigin = <?!= JSON.stringify(allowedOrigin) ?>;
+      window.addEventListener('message', function(event) {
+        if (event.source !== window.top || event.origin !== allowedOrigin) return;
+        const message = event.data;
+        if (!message || message.type !== 'wpm-request' || typeof message.id !== 'string') return;
+        google.script.run
+          .withSuccessHandler(function(result) {
+            window.top.postMessage({type:'wpm-response', id:message.id, result:result}, allowedOrigin);
+          })
+          .withFailureHandler(function(error) {
+            window.top.postMessage({type:'wpm-response', id:message.id, error:error.message || 'Apps Script request failed.'}, allowedOrigin);
+          })
+          .apiRequest(message.request);
+      });
+      window.top.postMessage({type:'wpm-ready'}, allowedOrigin);
+    </script>
+  </body>
+</html>

@@ -43,7 +43,13 @@ const STARTER_WORDS = (
 ).split(/\s+/);
 
 function doGet() {
-  return jsonOutput_({ ok: true, service: 'WPM RACER API' });
+  const allowedOrigin = PropertiesService.getScriptProperties().getProperty('WPM_ALLOWED_ORIGIN');
+  if (!allowedOrigin || !/^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(allowedOrigin)) {
+    throw new Error('Set WPM_ALLOWED_ORIGIN to your GitHub Pages origin in Script Properties.');
+  }
+  const template = HtmlService.createTemplateFromFile('Bridge');
+  template.allowedOrigin = allowedOrigin;
+  return template.evaluate().setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 function doPost(e) {
@@ -74,6 +80,7 @@ function ok_(data) {
 }
 
 function setupDatabase() {
+  requireOwnerExecution_();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   Object.keys(HEADERS).forEach(function(name) {
     let sheet = ss.getSheetByName(name);
@@ -105,7 +112,7 @@ function setupDatabase() {
   return 'WPM RACER sheets are ready. Add temporary admin credentials in Script Properties and run provisionAdminAccount.';
 }
 
-function createAdminAccount(username, password, displayName) {
+function createAdminAccount_(username, password, displayName) {
   if (!username || !password || password.length < 12) {
     throw new Error('Provide a username and a password of at least 12 characters.');
   }
@@ -133,17 +140,18 @@ function createAdminAccount(username, password, displayName) {
 }
 
 function provisionAdminAccount() {
+  requireOwnerExecution_();
   const properties = PropertiesService.getScriptProperties();
   const username = properties.getProperty('WPM_ADMIN_USERNAME');
   const password = properties.getProperty('WPM_ADMIN_PASSWORD');
   const displayName = properties.getProperty('WPM_ADMIN_NAME') || 'Teacher';
   if (!username || !password) throw new Error('Set WPM_ADMIN_USERNAME and WPM_ADMIN_PASSWORD in Script Properties first.');
-  const result = createAdminAccount(username, password, displayName);
+  const result = createAdminAccount_(username, password, displayName);
   properties.deleteProperty('WPM_ADMIN_PASSWORD');
   return result + ' The bootstrap password property has been removed.';
 }
 
-function createStudentAccount(studentId, username, password, displayName, section) {
+function createStudentAccount_(studentId, username, password, displayName, section) {
   if (!studentId || !username || !password || password.length < 12 || !displayName) {
     throw new Error('Student ID, username, display name, and a password of at least 12 characters are required.');
   }
@@ -192,7 +200,7 @@ function apiRequest(request) {
       case 'adminExport': requireAdmin_(user); return ok_(adminExport_());
       case 'adminCreateStudent':
         requireAdmin_(user);
-        return ok_(createStudentAccount(payload.studentId, payload.username, payload.password, payload.displayName, payload.section));
+        return ok_(createStudentAccount_(payload.studentId, payload.username, payload.password, payload.displayName, payload.section));
       case 'adminAddPassage':
         requireAdmin_(user);
         return ok_(adminAddPassage_(payload));
@@ -961,6 +969,14 @@ function withLock_(callback) {
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try { return callback(); } finally { lock.releaseLock(); }
+}
+
+function requireOwnerExecution_() {
+  const activeEmail = Session.getActiveUser().getEmail();
+  const effectiveEmail = Session.getEffectiveUser().getEmail();
+  if (!activeEmail || !effectiveEmail || activeEmail.toLowerCase() !== effectiveEmail.toLowerCase()) {
+    throw new Error('Run this function as the script owner from the Apps Script editor.');
+  }
 }
 
 function passwordHash_(password, salt) {

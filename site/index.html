@@ -50,8 +50,14 @@
           }, 30000);
           function onReady(event) {
             let inFrame = false;
-            try { inFrame = event.source === frame.contentWindow || event.source.parent === frame.contentWindow; }
-            catch (error) { return; }
+            try {
+              let source = event.source;
+              for (let depth = 0; source && depth < 8; depth++) {
+                if (source === frame.contentWindow) { inFrame = true; break; }
+                if (source === window || source.parent === source) break;
+                source = source.parent;
+              }
+            } catch (error) { return; }
             let origin;
             try { origin = new URL(event.origin); } catch (error) { return; }
             if (!inFrame || origin.protocol !== 'https:' ||

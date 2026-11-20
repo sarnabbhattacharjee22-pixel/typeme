@@ -1,0 +1,7 @@
+name = "wpm-racer-api"
+main = "src/index.js"
+compatibility_date = "2026-11-20"
+
+[vars]
+APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTSNfezXOqgp8NXK3iW1zISNmD4_0cClPV3Gmx2O82YrvFRuOJJ__10aBLx5z0g-ij/exec"
+ALLOWED_ORIGINS = "https://sarnabbhattacharjee22-pixel.github.io"

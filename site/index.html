@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      :root{color-scheme:dark;--bg:#101113;--panel:#17191c;--panel2:#1d2024;--line:#303338;--muted:#8d929a;--text:#f0f1f2;--red:#e6454f;--red2:#a92d35;--green:#79c8a4;--gold:#e5bf72}
+      *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}
+      .shell{max-width:1180px;margin:auto;padding:28px 30px 60px}.topbar{height:60px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}.brand{font-weight:800;letter-spacing:.16em;font-size:15px}.brand i{font-style:normal;color:var(--red)}.top-right{display:flex;align-items:center;gap:14px;color:var(--muted);font-size:13px}.link-btn,.quiet{border:0;background:transparent;color:var(--muted);padding:8px}.link-btn:hover,.quiet:hover{color:white}.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}.title{font-size:30px;line-height:1.15;letter-spacing:-.04em;margin:8px 0 6px}.sub{color:var(--muted);margin:0}
+      .grid{display:grid;gap:14px}.stats{grid-template-columns:repeat(4,1fr);margin:28px 0}.card{background:var(--panel);border:1px solid var(--line);padding:20px}.stat-label{color:var(--muted);font-size:12px}.stat-value{font-size:29px;font-weight:650;letter-spacing:-.04em;margin-top:8px}.unit{font-size:13px;color:var(--muted);font-weight:500;letter-spacing:0}.layout{grid-template-columns:1.45fr 1fr}.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.section-title{font-size:15px;margin:0;font-weight:650}.action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+      .btn{border:1px solid var(--line);color:var(--text);background:var(--panel2);padding:10px 15px;font-weight:600;transition:background .15s,border .15s}.btn:hover{border-color:#555a61;background:#24272b}.btn.primary{background:var(--red);border-color:var(--red);color:white}.btn.primary:hover{background:#d33c46}.btn.small{font-size:12px;padding:7px 10px}.btn.block{width:100%}
+      .list{display:flex;flex-direction:column}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #292c30}.row:last-child{border-bottom:0}.row-main{min-width:0}.row-title{font-weight:600}.row-meta{font-size:12px;color:var(--muted)}.value{font-variant-numeric:tabular-nums;font-weight:650}.empty{padding:24px 12px;color:var(--muted);text-align:center;border:1px dashed var(--line)}
+      .login-wrap{min-height:80vh;display:grid;place-items:center}.login{width:min(420px,100%);background:var(--panel);border:1px solid var(--line);padding:30px}.login h1{font-size:24px;margin:0 0 5px}.field{display:flex;flex-direction:column;gap:6px;margin:15px 0}.field label{font-size:12px;color:#b9bdc3}.field input,.field textarea,.field select{background:#101113;border:1px solid var(--line);color:var(--text);padding:11px 12px;outline:none}.field textarea{min-height:120px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:#767b83}.error{color:#ff858c;font-size:13px;margin:10px 0}.success{color:var(--green);font-size:13px;margin:10px 0}
+      .chart{height:190px;width:100%;display:block}.chart-legend{display:flex;gap:16px;color:var(--muted);font-size:11px;margin-top:4px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:5px}.dot.alt{background:#72b6d2}
+      .winner-card{border-color:#766440;box-shadow:inset 3px 0 var(--gold)}
+      .race-top{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}.race-layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px;margin-top:22px}.type-panel{min-height:400px}.reference{font:22px/1.9 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.01em;color:#a6aab0;margin:6px 0 18px;white-space:pre-wrap;overflow-wrap:anywhere}.reference .correct{color:#f4f4f4}.reference .incorrect{color:#ff7279;background:#4b2226}.reference .current{border-bottom:2px solid var(--red)}.type-input{width:100%;min-height:170px;background:#111214;border:1px solid var(--line);padding:14px;color:var(--text);font:17px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical;outline:none}.type-input:focus{border-color:#696e76}.race-statbar{display:flex;gap:22px;margin-top:16px;flex-wrap:wrap}.race-stat strong{font-size:18px;display:block}.race-stat span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}.competitor{padding:10px 0;border-bottom:1px solid var(--line)}.comp-title{display:flex;justify-content:space-between;font-size:13px}.meter{height:3px;background:#2c2f34;margin-top:8px}.meter i{height:100%;display:block;background:var(--red)}.timer{font-variant-numeric:tabular-nums;font-size:38px;letter-spacing:-.04em;font-weight:650}.badge{display:inline-flex;border:1px solid var(--line);padding:3px 8px;color:var(--muted);font-size:11px}.winner{color:var(--gold)}.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin:20px 0}.tab{background:none;border:0;color:var(--muted);padding:10px 12px;border-bottom:2px solid transparent}.tab.active{color:var(--text);border-color:var(--red)}.admin-grid{grid-template-columns:1fr 1fr}.notice{font-size:12px;color:var(--muted);line-height:1.6}.spinner{color:var(--muted);font-size:13px}
+      @media(max-width:850px){.shell{padding:18px 16px 40px}.layout,.race-layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.race-layout{gap:12px}.type-panel{min-height:300px}.title{font-size:26px}}
+      @media(max-width:480px){.stats{gap:8px}.card{padding:14px}.stat-value{font-size:23px}.topbar{margin-bottom:24px}.race-top{display:block}.timer{font-size:32px}.reference{font-size:18px}}
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="./config.js"></script>
+    <script>
+      const state = {token: localStorage.getItem('wpm-token') || '', user: null, data: null, race: null, timer: null, poller: null, secondsLeft: 0, text: '', started: false, lastProgress: 0, admin: null};
+      const ACHIEVEMENTS = {
+        'first-lap':'First Lap','speed-demon':'Speed Demon','precision-master':'Precision Master',
+        'comeback-racer':'Comeback Racer','consistency':'Consistency','champion':'Champion',
+        'perfect-run':'Perfect Run','marathon':'Marathon'
+      };
+      async function call(action, payload) {
+        const apiUrl = window.WPM_CONFIG && window.WPM_CONFIG.apiUrl;
+        if (!apiUrl || apiUrl.indexOf('YOUR-WORKER') >= 0) {
+          throw new Error('Set the Cloudflare Worker API URL in config.js before using WPM RACER.');
+        }
+        let response;
+        try {
+          response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({action:action, payload:Object.assign({}, payload || {}, {token:state.token})}),
+            credentials: 'omit',
+            cache: 'no-store'
+          });
+        } catch (error) {
+          throw new Error('Could not reach the WPM RACER API. Check the network and proxy configuration.');
+        }
+        let result;
+        try {
+          result = await response.json();
+        } catch (error) {
+          throw new Error('The API proxy returned an invalid response.');
+        }
+        if (!response.ok || !result || !result.ok) {
+          throw new Error(result && result.error || 'The API request failed (' + response.status + ').');
+        }
+        return result.data;
+      }
+      function h(tag, attrs, children) {
+        const el = document.createElement(tag);
+        Object.keys(attrs || {}).forEach(function(key) {
+          if (key === 'class') el.className = attrs[key];
+          else if (key.indexOf('on') === 0) el.addEventListener(key.slice(2).toLowerCase(), attrs[key]);
+          else el.setAttribute(key, attrs[key]);
+        });
+        (Array.isArray(children) ? children : [children]).forEach(function(child) {
+          if (child === null || child === undefined) return;
+          el.appendChild(child instanceof Node ? child : document.createTextNode(String(child)));
+        });
+        return el;
+      }
+      function el(tag, attrs, children) { return h(tag, attrs, children); }
+      function clear() { document.getElementById('app').replaceChildren(); }
+      function frame(title, subtitle, action) {
+        const wrap = el('div', {class:'shell'});
+        const bar = el('div', {class:'topbar'}, [
+          el('div', {class:'brand'}, [document.createTextNode('WPM '), el('i', {}, 'RACER')]),
+          el('div', {class:'top-right'}, [
+            state.user ? el('span', {}, state.user.displayName) : null,
+            action || null
+          ])
+        ]);
+        wrap.appendChild(bar);
+        if (title) wrap.appendChild(el('div', {}, [
+          el('div', {class:'eyebrow'}, 'CLASSROOM TYPING'),
+          el('h1', {class:'title'}, title),
+          subtitle ? el('p', {class:'sub'}, subtitle) : null
+        ]));
+        document.getElementById('app').replaceChildren(wrap);
+        return wrap;
+      }
+      function button(label, fn, primary, small) {
+        return el('button', {class:'btn' + (primary ? ' primary' : '') + (small ? ' small' : ''), onclick:fn}, label);
+      }
+      function card(title, content, action) {
+        const box = el('section', {class:'card'});
+        if (title) box.appendChild(el('div', {class:'section-head'}, [
+          el('h2', {class:'section-title'}, title),
+          action || null
+        ]));
+        box.appendChild(content);
+        return box;
+      }
+      function stat(label, value, unit) {
+        return el('div', {class:'card'}, [
+          el('div', {class:'stat-label'}, label),
+          el('div', {class:'stat-value'}, [String(value), unit ? el('span', {class:'unit'}, ' ' + unit) : null])
+        ]);
+      }
+      function loginView(message) {
+        state.user = null;
+        const root = document.getElementById('app');
+        const wrap = el('div', {class:'shell login-wrap'});
+        const box = el('form', {class:'login'});
+        box.appendChild(el('div', {class:'brand'}, [document.createTextNode('WPM '), el('i', {}, 'RACER')]));
+        box.appendChild(el('h1', {}, 'Sign in to race'));
+        box.appendChild(el('p', {class:'sub'}, 'Use your classroom username and password.'));
+        const username = el('input', {name:'username', autocomplete:'username', required:'required'});
+        const password = el('input', {name:'password', type:'password', autocomplete:'current-password', required:'required'});
+        box.appendChild(el('div', {class:'field'}, [el('label', {}, 'Username or student ID'), username]));
+        box.appendChild(el('div', {class:'field'}, [el('label', {}, 'Password'), password]));
+        if (message) box.appendChild(el('div', {class:'error'}, message));
+        const submit = el('button', {class:'btn primary block', type:'submit'}, 'Continue');
+        box.appendChild(submit);
+        box.addEventListener('submit', async function(event) {
+          event.preventDefault();
+          submit.disabled = true;
+          submit.textContent = 'Signing in…';
+          try {
+            const result = await call('login', {username:username.value, password:password.value});
+            state.token = result.token;
+            state.user = result.user;
+            localStorage.setItem('wpm-token', state.token);
+            await loadDashboard();
+          } catch (error) {
+            loginView(error.message);
+          }
+        });
+        wrap.appendChild(box);
+        root.replaceChildren(wrap);
+      }
+      async function loadDashboard() {
+        try {
+          state.data = await call('bootstrap');
+          state.user = state.data.user;
+          dashboardView();
+        } catch (error) {
+          state.token = '';
+          localStorage.removeItem('wpm-token');
+          loginView(error.message);
+        }
+      }
+      function dashboardView() {
+        const root = frame('Welcome back, ' + state.user.displayName.split(' ')[0], 'Your progress, your pace. Make every keystroke count.',
+          el('button', {class:'link-btn', onclick:logout}, 'Sign out'));
+        const stats = state.data.stats;
+        root.appendChild(el('div', {class:'grid stats'}, [
+          stat('PERSONAL BEST', stats.bestWpm, 'WPM'),
+          stat('AVERAGE SPEED', stats.averageWpm, 'WPM'),
+          stat('BEST ACCURACY', stats.bestAccuracy, '%'),
+          stat('CLASS RANK', stats.rank ? '#' + stats.rank : '—', '')
+        ]));
+        root.appendChild(el('div', {class:'grid stats', style:'margin-top:-14px'}, [
+          stat('RACES COMPLETED', stats.races, ''),
+          stat('VALID WORDS', stats.validWords, ''),
+          stat('AVERAGE ACCURACY', stats.averageAccuracy, '%'),
+          stat('DAILY STREAK', stats.dailyStreak, 'days')
+        ]));
+        const start = button('Start a race', function() { raceSetup(); }, true);
+        const practice = button('Practice mode', function() { raceSetup('practice'); }, false);
+        const daily = state.data.daily ? button('Daily challenge', function() {
+          startRace({mode:'daily', duration:state.data.daily.duration, passageId:state.data.daily.passage.passageId});
+        }, false) : null;
+        const actions = el('div', {class:'action-row'}, [start, practice, daily, button('Leaderboards', function() { leaderboardView(); })]);
+        if (state.data.activeRace) {
+          actions.appendChild(button('Reconnect to active race', function() {
+            state.race = state.data.activeRace;
+            if (state.race.status === 'racing') raceView();
+            else showLobby(state.race);
+          }));
+        }
+        root.appendChild(actions);
+        const left = el('div', {class:'grid'});
+        const chartWrap = el('div', {});
+        const canvas = el('canvas', {class:'chart', width:'760', height:'210'});
+        chartWrap.appendChild(canvas);
+        chartWrap.appendChild(el('div', {class:'chart-legend'}, [
+          el('span', {}, [el('i', {class:'dot'}), 'WPM']),
+          el('span', {}, [el('i', {class:'dot alt'}), 'Accuracy'])
+        ]));
+        left.appendChild(card('Performance trend', chartWrap));
+        const recent = el('div', {class:'list'});
+        state.data.recent.forEach(function(row) {
+          recent.appendChild(el('div', {class:'row'}, [
+            el('div', {class:'row-main'}, [
+              el('div', {class:'row-title'}, row.mode.toUpperCase() + ' · ' + row.duration + ' sec'),
+              el('div', {class:'row-meta'}, new Date(row.completedAt).toLocaleDateString())
+            ]),
+            el('div', {class:'value'}, [row.wpm + ' WPM', el('span', {class:'row-meta'}, ' · ' + row.accuracy + '%')])
+          ]));
+        });
+        if (!state.data.recent.length) recent.appendChild(el('div', {class:'empty'}, 'Complete your first race to see your progress here.'));
+        left.appendChild(card('Recent races', recent));
+        const right = el('div', {class:'grid'});
+        const board = el('div', {class:'list'});
+        state.data.leaderboard.forEach(function(row) {
+          board.appendChild(el('div', {class:'row'}, [
+            el('div', {class:'row-main'}, [
+              el('div', {class:'row-title'}, [String(row.rank).padStart(2, '0') + '  ', row.name]),
+              el('div', {class:'row-meta'}, row.accuracy + '% accuracy')
+            ]),
+            el('div', {class:'value'}, row.wpm + ' WPM')
+          ]));
+        });
+        if (!state.data.leaderboard.length) board.appendChild(el('div', {class:'empty'}, 'Rankings appear after verified races.'));
+        right.appendChild(card('Class leaderboard', board, button('Refresh', loadDashboard, false, true)));
+        const challenge = el('div', {}, [
+          el('div', {class:'eyebrow'}, 'TODAY · ' + (state.data.daily ? state.data.daily.date : '')),
+          el('h3', {style:'margin:7px 0 4px'}, state.data.daily ? state.data.daily.passage.title : 'No challenge available'),
+          el('p', {class:'row-meta'}, state.data.daily ? state.data.daily.passage.difficulty + ' · ' + state.data.daily.duration + ' seconds · ' + state.data.daily.timezone : '')
+        ]);
+        if (state.data.dailyLeaderboard.length) {
+          challenge.appendChild(el('div',{class:'list'},state.data.dailyLeaderboard.map(function(row){
+            return el('div',{class:'row'},[
+              el('div',{class:'row-title'},String(row.rank).padStart(2,'0')+'  '+row.name),
+              el('div',{class:'value'},row.wpm+' WPM')
+            ]);
+          })));
+        }
+        right.appendChild(card('Daily challenge', challenge, state.data.daily ? button('Take challenge', function() {
+          startRace({mode:'daily', duration:state.data.daily.duration, passageId:state.data.daily.passage.passageId});
+        }, true, true) : null));
+        const achievements = el('div', {class:'list'});
+        if (!state.data.achievements.length) achievements.appendChild(el('div', {class:'empty'}, 'Your first achievement is waiting.'));
+        state.data.achievements.forEach(function(id) {
+          achievements.appendChild(el('div', {class:'row'}, [
+            el('div', {class:'row-title'}, ACHIEVEMENTS[id] || id),
+            el('span', {class:'badge'}, 'EARNED')
+          ]));
+        });
+        right.appendChild(card('Achievements', achievements));
+        root.appendChild(el('div', {class:'grid layout'}, [left, right]));
+        if (state.user.role === 'admin') root.appendChild(el('div', {class:'action-row'}, [button('Teacher portal', adminView)]));
+        drawChart(canvas, state.data.chart);
+      }
+      function drawChart(canvas, points) {
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height, pad = 24;
+        ctx.clearRect(0, 0, w, h);
+        ctx.strokeStyle = '#303338'; ctx.lineWidth = 1;
+        for (let i=0;i<4;i++){const y=pad+i*(h-pad*2)/3;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke();}
+        if (!points.length) {
+          ctx.fillStyle = '#8d929a';ctx.font='14px system-ui';ctx.textAlign='center';ctx.fillText('Your race history will appear here.',w/2,h/2);
+          return;
+        }
+        const drawLine = function(key, color, max) {
+          ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();
+          points.forEach(function(point,index){
+            const x=pad+(points.length<2?(w-pad*2)/2:index*(w-pad*2)/(points.length-1));
+            const y=h-pad-(Number(point[key])/max)*(h-pad*2);
+            if(index===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+          });
+          ctx.stroke();
+        };
+        drawLine('wpm','#e6454f',Math.max(80,...points.map(function(p){return Number(p.wpm)})));
+        drawLine('accuracy','#72b6d2',100);
+      }
+      async function leaderboardView(activeScope) {
+        const scopes = [
+          ['classroom','Classroom'],
+          ['weekly','This week'],
+          ['personalBest','Personal best'],
+          ['daily','Daily challenge']
+        ];
+        const scope = activeScope || 'classroom';
+        const root = frame('Leaderboards', 'Official results only · minimum accuracy ' + state.data.settings.accuracyThreshold + '%');
+        const tabs = el('div',{class:'tabs'});
+        const results = el('div',{class:'list'});
+        scopes.forEach(function(item){
+          const tab = el('button',{class:'tab'+(item[0]===scope?' active':''),onclick:function(){leaderboardView(item[0]);}},item[1]);
+          tabs.appendChild(tab);
+        });
+        root.appendChild(tabs);
+        root.appendChild(card(scopes.find(function(item){return item[0]===scope;})[1],results));
+        root.appendChild(el('div',{class:'action-row'},[button('Back to dashboard',loadDashboard)]));
+        try {
+          const rows = await call('leaderboard',{scope:scope});
+          rows.forEach(function(row){
+            results.appendChild(el('div',{class:'row'},[
+              el('div',{class:'row-main'},[
+                el('div',{class:'row-title'},String(row.rank).padStart(2,'0')+'  '+row.name),
+                el('div',{class:'row-meta'},row.races+' qualifying race'+(row.races===1?'':'s')+' · '+row.accuracy+'% accuracy')
+              ]),
+              el('div',{class:'value'},row.wpm+' WPM')
+            ]));
+          });
+          if (!rows.length) results.appendChild(el('div',{class:'empty'},'No eligible results yet.'));
+        } catch(error) {
+          results.appendChild(el('div',{class:'error'},error.message));
+        }
+      }
+      function raceSetup(forceMode) {
+        const root = frame('Choose your race', 'Find a room or start a focused solo challenge.');
+        const form = el('div', {class:'grid admin-grid'});
+        const mode = el('select', {});
+        [['copy','Beat the computer'],['free','Write your own'],['accuracy','Accuracy challenge'],['practice','Practice']].forEach(function(item) {
+          mode.appendChild(el('option', {value:item[0]}, item[1]));
+        });
+        if (forceMode) mode.value = forceMode;
+        const duration = el('select', {});
+        [30,60,120,300].forEach(function(value) { duration.appendChild(el('option', {value:value}, value + ' seconds')); });
+        const difficulty = el('select', {});
+        ['any','easy','medium','hard'].forEach(function(value) { difficulty.appendChild(el('option', {value:value}, value[0].toUpperCase()+value.slice(1))); });
+        const passages = state.data.passages || [];
+        const passage = el('select', {});
+        passages.forEach(function(item) { passage.appendChild(el('option', {value:item.passageId}, item.title + ' · ' + item.difficulty)); });
+        const roomCode = el('input', {placeholder:'6-digit room code', inputmode:'numeric', maxlength:'6'});
+        const privateRoom = el('input', {type:'checkbox'});
+        const setupForm = el('div', {});
+        setupForm.appendChild(el('div', {class:'field'}, [el('label', {}, 'Race mode'), mode]));
+        setupForm.appendChild(el('div', {class:'field'}, [el('label', {}, 'Duration'), duration]));
+        setupForm.appendChild(el('div', {class:'field'}, [el('label', {}, 'Difficulty'), difficulty]));
+        setupForm.appendChild(el('div', {class:'field'}, [el('label', {}, 'Passage'), passage]));
+        setupForm.appendChild(el('label', {class:'row-meta'}, [privateRoom, ' Create a private room']));
+        const roomForm = el('div', {});
+        roomForm.appendChild(el('div', {class:'eyebrow'}, 'JOIN A PRIVATE ROOM'));
+        roomForm.appendChild(el('div', {class:'field'}, [el('label', {}, 'Room code'), roomCode]));
+        const message = el('div', {class:'error'});
+        const create = button('Find or create a race', async function() {
+          create.disabled = true;
+          try {
+            await startRace({
+              mode:mode.value, duration:Number(duration.value), difficulty:difficulty.value,
+              passageId:(mode.value === 'free' || mode.value === 'practice') ? '' : passage.value, privateRoom:privateRoom.checked,
+              practice:mode.value === 'practice'
+            });
+          } catch (error) { message.textContent = error.message; }
+          finally { create.disabled = false; }
+        }, true);
+        const join = button('Join room', async function() {
+          try { const result = await call('joinRace', {code:roomCode.value}); showLobby(result); }
+          catch (error) { message.textContent = error.message; }
+        });
+        setupForm.appendChild(el('div', {class:'action-row'}, [create]));
+        roomForm.appendChild(join);
+        form.appendChild(card('Set up', setupForm));
+        form.appendChild(card('Race room', roomForm));
+        root.appendChild(form);
+        root.appendChild(message);
+      }
+      async function startRace(options) {
+        try {
+          const result = await call('createRace', options);
+          showLobby(result);
+        } catch (error) { alert(error.message); }
+      }
+      function showLobby(race) {
+        state.race = race;
+        state.started = false;
+        state.finishing = false;
+        state.text = '';
+        state.lastProgress = 0;
+        state.pendingResult = null;
+        const root = frame('Race room', race.duration + ' seconds · ' + race.mode.toUpperCase());
+        if (race.roomCode) root.appendChild(el('div', {class:'card', style:'margin-top:20px'}, [
+          el('div', {class:'eyebrow'}, 'INVITE CLASSMATES'),
+          el('div', {class:'stat-value'}, race.roomCode)
+        ]));
+        root.appendChild(el('div', {class:'card', style:'margin-top:16px'}, [
+          el('div', {class:'section-head'}, [
+            el('h2', {class:'section-title'}, race.passage ? race.passage.title : 'Free writing race'),
+            el('span', {class:'badge'}, race.participantCount + ' RACER' + (race.participantCount === 1 ? '' : 'S'))
+          ]),
+          race.passage ? el('p', {class:'sub'}, race.passage.text.slice(0,180) + (race.passage.text.length > 180 ? '…' : '')) : el('p', {class:'sub'}, 'You will type original text. The timer begins on your first keystroke.'),
+          el('div', {class:'notice', style:'margin-top:14px'}, 'The timer starts when the first racer begins. Keep this page open; reconnecting does not extend the race.'),
+          el('div', {class:'action-row'}, [
+            button('Enter race', function(){ raceView(); }, true),
+            button('Back to dashboard', loadDashboard)
+          ])
+        ]));
+      }
+      function raceView() {
+        const race = state.race;
+        if (!race) return loadDashboard();
+        const root = frame('Race in progress', race.mode.toUpperCase() + ' · ' + race.duration + ' seconds');
+        const time = el('div', {class:'timer'}, race.duration + 's');
+        const textInput = el('textarea', {class:'type-input', autocomplete:'off', autocapitalize:'off', spellcheck:'false', placeholder:'Start typing here…'});
+        textInput.value = state.text;
+        textInput.disabled = false;
+        const reference = race.passage ? referenceNode(race.passage.text, state.text) : null;
+        const stats = el('div', {class:'race-statbar'});
+        const wpm = el('div', {class:'race-stat'}, [el('strong', {}, '0'), el('span', {}, 'WPM')]);
+        const accuracy = el('div', {class:'race-stat'}, [el('strong', {}, '100%'), el('span', {}, 'Accuracy')]);
+        const words = el('div', {class:'race-stat'}, [el('strong', {}, '0'), el('span', {}, 'Words')]);
+        const errors = el('div', {class:'race-stat'}, [el('strong', {}, '0'), el('span', {}, 'Errors')]);
+        [wpm,accuracy,words,errors].forEach(function(item){stats.appendChild(item);});
+        const typeBox = el('div', {class:'card type-panel'}, [
+          reference ? el('div', {class:'reference', id:'reference'}, reference) : el('div', {class:'eyebrow'}, 'FREE WRITING'),
+          textInput, stats
+        ]);
+        const comps = el('div', {class:'list', id:'competitors'}, el('div', {class:'empty'}, 'Waiting for racers…'));
+        const side = el('div', {class:'grid'}, [
+          card('TIME REMAINING', el('div', {}, [time, el('p', {class:'row-meta'}, 'Timer starts on first keystroke.')])),
+          card('RACERS', comps),
+          el('div', {}, [button('Finish race', finishRace, false)])
+        ]);
+        root.appendChild(el('div', {class:'race-layout'}, [typeBox, side]));
+        root.appendChild(el('div', {class:'notice', id:'raceNotice', style:'margin-top:12px'}));
+        textInput.addEventListener('input', async function() {
+          state.text = textInput.value;
+          if (!state.started) {
+            state.started = true;
+            let startedAt;
+            try { const started = await call('beginRace', {raceId:race.raceId}); startedAt = started.startedAt; }
+            catch (error) { textInput.disabled = true; alert(error.message); return; }
+            startTimer(startedAt);
+          }
+          updateLiveStats(textInput.value, race, {wpm:wpm, accuracy:accuracy, words:words, errors:errors});
+          const ref = document.getElementById('reference');
+          if (ref && race.passage) ref.replaceChildren(referenceNode(race.passage.text, textInput.value));
+          if (Date.now() - state.lastProgress > 5000) {
+            state.lastProgress = Date.now();
+            call('liveProgress', {raceId:race.raceId, text:textInput.value, accuracy:Number(accuracy.firstChild.textContent.replace('%',''))})
+              .catch(function(error){showRaceNotice('Competitor updates are delayed: '+error.message);});
+          }
+        });
+        textInput.focus();
+        state.secondsLeft = race.duration;
+        refreshRaceState();
+        state.poller = setInterval(refreshRaceState, 3000);
+      }
+      function referenceNode(reference, typed) {
+        const frag = document.createDocumentFragment();
+        for (let i=0;i<reference.length;i++) {
+          const cls = i < typed.length ? (typed[i] === reference[i] ? 'correct' : 'incorrect') : (i === typed.length ? 'current' : '');
+          frag.appendChild(el('span', {class:cls}, reference[i]));
+        }
+        return frag;
+      }
+      function updateLiveStats(text, race, refs) {
+        const seconds = Math.max(1, race.duration - state.secondsLeft);
+        const wordsTyped = text.trim() ? text.trim().split(/\s+/).length : 0;
+        let matches = 0, errorsCount = 0;
+        if (race.passage) {
+          const count = Math.min(text.length, race.passage.text.length);
+          for(let i=0;i<count;i++){if(text[i]===race.passage.text[i])matches++;else errorsCount++;}
+          errorsCount += Math.max(0,text.length-race.passage.text.length);
+        } else {
+          const invalid = (text.match(/[A-Za-z]+(?:['’-][A-Za-z]+)*/g)||[]).filter(function(word){return !KNOWN_WORDS.has(word.toLowerCase().replace(/’/g,"'"));}).length;
+          matches = Math.max(0, wordsTyped - invalid);
+          errorsCount = invalid;
+        }
+        refs.wpm.firstChild.textContent = (wordsTyped / seconds * 60).toFixed(0);
+        refs.accuracy.firstChild.textContent = (race.passage ? (text.length ? matches / text.length * 100 : 100) : (wordsTyped ? matches / wordsTyped * 100 : 100)).toFixed(0) + '%';
+        refs.words.firstChild.textContent = race.passage ? (text.trim() ? text.trim().split(/\s+/).length : 0) : matches;
+        refs.errors.firstChild.textContent = errorsCount;
+      }
+      function startTimer(startedAt) {
+        if (state.timer) return;
+        if (startedAt) {
+          state.secondsLeft = Math.max(0, state.race.duration - Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000));
+          const timer = document.querySelector('.timer');
+          if (timer) timer.textContent = state.secondsLeft + 's';
+        }
+        state.timer = setInterval(function(){
+          state.secondsLeft--;
+          const timer = document.querySelector('.timer');
+          if(timer) timer.textContent = Math.max(0,state.secondsLeft) + 's';
+          if(state.secondsLeft <= 0) finishRace();
+        },1000);
+      }
+      async function refreshRaceState() {
+        if (!state.race) return;
+        try {
+          const status = await call('raceState', {raceId:state.race.raceId});
+          showRaceNotice('');
+          renderCompetitors(status.competitors || []);
+          if (status.status === 'racing' && !state.timer) startTimer(status.startedAt);
+          if (status.status === 'expired') {
+            stopRaceTimers();
+            state.race = null;
+            alert('This race room expired before it started. Create a new race.');
+            loadDashboard();
+            return;
+          }
+          if (status.status === 'completed' && state.pendingResult) {
+            resultView(Object.assign({}, state.pendingResult, {
+              raceComplete:true,
+              isWinner:status.isWinner,
+              rank:status.rank,
+              winnerVideoUrl:status.winnerVideoUrl,
+              leaderboard:status.leaderboard
+            }));
+          }
+        } catch (error) {
+          if (error.message.indexOf('session expired') >= 0) {
+            stopRaceTimers();
+            alert('Your session expired. Sign in again to recover.');
+            localStorage.removeItem('wpm-token');
+            loginView(error.message);
+          } else {
+            showRaceNotice('Connection interrupted. Reconnecting… '+error.message);
+          }
+        }
+      }
+      function showRaceNotice(message) {
+        const notice = document.getElementById('raceNotice');
+        if (notice) notice.textContent = message;
+      }
+      function renderCompetitors(items) {
+        const box = document.getElementById('competitors');
+        if (!box) return;
+        box.replaceChildren();
+        items.sort(function(a,b){return Number(b.wpm)-Number(a.wpm);});
+        if (!items.length) box.appendChild(el('div', {class:'empty'}, 'Waiting for racers…'));
+        items.forEach(function(item,index){
+          const row = el('div', {class:'competitor'}, [
+            el('div', {class:'comp-title'}, [
+              el('span', {}, [String(index+1).padStart(2,'0')+'  ', item.name + (item.submitted ? ' · FINISHED' : '')]),
+              el('strong', {}, item.wpm + ' WPM')
+            ]),
+            el('div', {class:'meter'}, el('i', {style:'width:'+Math.min(100,Number(item.progress||0))+'%'}))
+          ]);
+          box.appendChild(row);
+        });
+      }
+      async function finishRace() {
+        if (!state.race || state.finishing) return;
+        state.finishing = true;
+        stopRaceTimers();
+        const input = document.querySelector('.type-input');
+        if (input) input.disabled = true;
+        try {
+          const result = await call('submitRace', {raceId:state.race.raceId, text:state.text});
+          resultView(result);
+        } catch (error) {
+          state.finishing = false;
+          if (error.message.indexOf('already been submitted') >= 0) await loadDashboard();
+          else {
+            alert(error.message);
+            if (input) input.disabled = false;
+          }
+        }
+      }
+      function stopRaceTimers() {
+        if(state.timer){clearInterval(state.timer);state.timer=null;}
+        if(state.poller){clearInterval(state.poller);state.poller=null;}
+      }
+      function resultView(data) {
+        const result = data.result;
+        const complete = data.raceComplete !== false;
+        const statusText = result.practice
+          ? 'Practice result saved and excluded from official rankings.'
+          : (result.eligible ? 'An official result has been recorded.' : 'The result is saved; accuracy was below the ranking threshold.');
+        if (complete) {
+          state.race = null;
+          state.pendingResult = null;
+          state.finishing = false;
+          stopRaceTimers();
+        } else {
+          state.pendingResult = data;
+        }
+        const root = frame(complete ? 'Race complete' : 'Result submitted', complete
+          ? statusText
+          : 'Waiting for the other racers to finish before confirming the standings.');
+        if (!complete) {
+          root.appendChild(card('Standings pending', el('p', {class:'sub'}, 'Your score is saved. Final ranking and winner-only celebration will appear when the room closes.')));
+          if (!state.poller) state.poller = setInterval(refreshRaceState, 2500);
+        }
+        const stats = el('div', {class:'grid stats'}, [
+          stat('VALID SPEED', result.wpm, 'WPM'),
+          stat('ACCURACY', result.accuracy, '%'),
+          stat('CORRECT WORDS', result.correctWords, ''),
+          stat('ERRORS', result.errors, '')
+        ]);
+        root.appendChild(stats);
+        const resultCard = card('Your result', el('div', {}, [
+          el('div', {class:'eyebrow'}, result.practice ? 'PRACTICE ONLY' : (result.eligible ? 'RANKING ELIGIBLE' : 'NOT RANKING ELIGIBLE')),
+          el('h2', {class:'title'}, complete && data.isWinner ? 'First place.' : (complete ? (result.practice ? 'Practice logged.' : 'Race logged.') : 'Score recorded.')),
+          el('p', {class:'sub'}, 'Raw speed: ' + result.rawWpm + ' WPM · ' + result.duration + ' sec · ' + (result.practice ? 'Practice does not affect official rankings.' : (result.eligible ? 'Meets the accuracy threshold.' : 'Official leaderboard credit requires at least ' + state.data.settings.accuracyThreshold + '% accuracy.')))
+        ]));
+        if (complete && data.isWinner) resultCard.classList.add('winner-card');
+        root.appendChild(resultCard);
+        const board = el('div', {class:'list'});
+        (data.leaderboard || []).slice(0,8).forEach(function(row){
+          board.appendChild(el('div', {class:'row'}, [
+            el('div', {class:'row-title'}, [String(row.rank).padStart(2,'0')+'  ', row.name]),
+            el('div', {class:'value'}, row.wpm+' WPM · '+row.accuracy+'%')
+          ]));
+        });
+        if ((data.leaderboard || []).length) root.appendChild(card('Race standings', board));
+        if (complete && data.isWinner) {
+          if (data.winnerVideoUrl) {
+            const video = el('video', {src:data.winnerVideoUrl, autoplay:'autoplay', muted:'muted', controls:'controls', playsinline:'playsinline', style:'width:min(560px,100%);margin-top:16px'});
+            const sound = button('Enable sound', function(){video.muted=false;video.play();});
+            root.appendChild(card('Victory', el('div', {}, [el('div',{class:'winner'},'FIRST PLACE · WINNER'),video,sound])));
+          } else {
+            root.appendChild(card('Victory', el('div', {class:'winner'}, 'FIRST PLACE · WINNER')));
+          }
+        }
+        if (complete) {
+          root.appendChild(el('div', {class:'action-row'}, [button('Return to dashboard', loadDashboard, true), button('Race again', function() { raceSetup(); })]));
+        }
+        if(data.personalBest) root.appendChild(el('div', {class:'success'}, 'New personal best achieved.'));
+      }
+      async function adminView() {
+        const root = frame('Teacher portal', 'Manage classroom accounts and race settings.');
+        try {
+          state.admin = await call('adminOverview');
+          const content = el('div', {class:'grid admin-grid'});
+          const threshold = el('input', {type:'number',min:'50',max:'100',value:state.admin.accuracyThreshold});
+          const thresholdMessage = el('div', {class:'notice'});
+          content.appendChild(card('Ranking threshold', el('div', {}, [
+            el('div', {class:'field'}, [el('label', {}, 'Minimum eligible accuracy (%)'), threshold]),
+            button('Save threshold', async function(){
+              try {await call('adminSetAccuracy',{value:threshold.value});thresholdMessage.textContent='Updated.';thresholdMessage.className='success';}
+              catch(error){thresholdMessage.textContent=error.message;thresholdMessage.className='error';}
+            }, true),
+            thresholdMessage
+          ])));
+          const studentForm = el('div', {});
+          const inputs = {};
+          [['studentId','Student ID'],['username','Username'],['displayName','Display name'],['section','Class / section'],['password','Temporary password']].forEach(function(item){
+            inputs[item[0]]=el('input',{type:item[0]==='password'?'password':'text'});
+            studentForm.appendChild(el('div',{class:'field'},[el('label',{},item[1]),inputs[item[0]]]));
+          });
+          const msg = el('div',{});
+          studentForm.appendChild(button('Create student',async function(){
+            try {
+              await call('adminCreateStudent',{
+                studentId:inputs.studentId.value,username:inputs.username.value,displayName:inputs.displayName.value,
+                section:inputs.section.value,password:inputs.password.value
+              });
+              msg.className='success';msg.textContent='Student created.';
+              Object.keys(inputs).forEach(function(key){inputs[key].value='';});
+            } catch(error){msg.className='error';msg.textContent=error.message;}
+          },true));
+          studentForm.appendChild(msg);
+          content.appendChild(card('Create student',studentForm));
+          const passageForm = el('div',{});
+          const pTitle=el('input',{}), pText=el('textarea',{}), pDifficulty=el('select',{});
+          ['easy','medium','hard'].forEach(function(value){pDifficulty.appendChild(el('option',{value:value},value));});
+          passageForm.appendChild(el('div',{class:'field'},[el('label',{},'Passage title'),pTitle]));
+          passageForm.appendChild(el('div',{class:'field'},[el('label',{},'Text'),pText]));
+          passageForm.appendChild(el('div',{class:'field'},[el('label',{},'Difficulty'),pDifficulty]));
+          passageForm.appendChild(button('Add passage',async function(){
+            try {await call('adminAddPassage',{title:pTitle.value,text:pText.value,difficulty:pDifficulty.value});msg.className='success';msg.textContent='Passage added.';}
+            catch(error){msg.className='error';msg.textContent=error.message;}
+          },true));
+          content.appendChild(card('Add challenge passage',passageForm));
+          const list=el('div',{class:'list'});
+          state.admin.students.forEach(function(student){list.appendChild(el('div',{class:'row'},[
+            el('div',{class:'row-main'},[el('div',{class:'row-title'},student.displayName),el('div',{class:'row-meta'},student.username+' · '+student.section)]),
+            el('span',{class:'badge'},'ACTIVE')
+          ]));});
+          content.appendChild(card('Students · '+state.admin.students.length,list));
+          const rooms = el('div',{class:'list'});
+          state.admin.activeRooms.forEach(function(room){
+            rooms.appendChild(el('div',{class:'row'},[
+              el('div',{class:'row-main'},[
+                el('div',{class:'row-title'},String(room.mode).toUpperCase()+' · '+room.duration+' sec'),
+                el('div',{class:'row-meta'},room.raceId)
+              ]),
+              el('span',{class:'badge'},String(room.status).toUpperCase())
+            ]));
+          });
+          if (!state.admin.activeRooms.length) rooms.appendChild(el('div',{class:'empty'},'No active rooms.'));
+          content.appendChild(card('Active race rooms',rooms));
+          const recentResults = el('div',{class:'list'});
+          state.admin.recentResults.forEach(function(item){
+            recentResults.appendChild(el('div',{class:'row'},[
+              el('div',{class:'row-main'},[
+                el('div',{class:'row-title'},String(item.mode).toUpperCase()+' · '+item.duration+' sec'),
+                el('div',{class:'row-meta'},new Date(item.completedAt).toLocaleString())
+              ]),
+              el('div',{class:'value'},item.wpm+' WPM · '+item.accuracy+'%')
+            ]));
+          });
+          content.appendChild(card('Recent results',recentResults));
+          root.appendChild(content);
+          root.appendChild(el('div',{class:'action-row'},[button('Download results CSV',downloadAdminCsv)]));
+          root.appendChild(el('p',{class:'notice',style:'margin-top:20px'},'Account passwords are hashed on the server. Use the Apps Script spreadsheet as the source of truth; never add raw passwords to a sheet.'));
+          root.appendChild(el('div',{class:'action-row'},[button('Back to dashboard',loadDashboard)]));
+        } catch(error) {
+          root.appendChild(el('div',{class:'error'},error.message));
+        }
+      }
+      async function logout() {
+        try { await call('logout', {token:state.token}); }
+        catch (error) { alert('Server logout could not be confirmed. The session will expire automatically.'); }
+        state.token='';state.user=null;state.data=null;
+        localStorage.removeItem('wpm-token');
+        loginView('');
+      }
+      async function downloadAdminCsv() {
+        try {
+          const result = await call('adminExport');
+          const url = URL.createObjectURL(new Blob([result.content], {type:'text/csv;charset=utf-8'}));
+          const link = el('a',{href:url,download:result.filename});
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+        } catch(error) {
+          alert(error.message);
+        }
+      }
+      const KNOWN_WORDS = new Set(('a about above across act after again against age ago air all also always among an and animal another answer any are around as ask at away back be because become before begin best better between big bird black body book both boy bring build but by call came can car carry change children city close cold come common complete country course create day did different do does down during each earth early easy end enough even every example eye face family far fast father feel few find first follow food for form found friend from full game gave get give go good great group grow had hand hard has have he head hear help her here high him his home house how however i idea if important in into is it its just keep kind know land large last later learn leave left length life light like line list little live long look made make man many map mark may me mean measure might mile mind minute money more morning most mother move much music must name near never new next night no not number object of off often old on once one only open or other our out over own page paper part people person place plan plant play point possible power problem put question quick quite ran read real right river road room round run said same saw say school sea second see seem sentence set several she short show side simple since small so some something sound spell start state still story study such take talk tell than that the their them then there these they thing think this those thought three through time to together too took toward tree turn two under until up us use usual very voice wait walk want warm was watch water way we well went were what when where which while white who why will wind with without word work world would write year you young your zero keyboard practice race correct accurate accuracy speed compete classroom challenge computer type typed typing progress score result student teacher daily weekly achievement record personal improve improvement precision race winner room code section test happy family forest mountain river country language people planet science history careful curious brave honest patient thoughtful brilliant quiet river sky cloud star light energy nature garden flower golden silver red blue green black brown person children teacher school laptop keyboard sentence paragraph punctuation today tomorrow monday tuesday wednesday thursday friday saturday sunday bangladesh dhaka london paris tokyo canada india nepal japan germany africa america australia pacific atlantic earth mars venus europe asia samira rahim salma imran arif').split(/\s+/));
+      if (state.token) loadDashboard(); else loginView('');
+    </script>
+  </body>
+</html>
